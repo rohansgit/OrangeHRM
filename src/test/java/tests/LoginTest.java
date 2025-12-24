@@ -1,5 +1,6 @@
 package tests;
 
+import Utilities.MyRetry;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
@@ -31,13 +32,13 @@ public class LoginTest extends BaseClass {
         driver.get("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
     }
 
-    @Test(priority=1)
+    @Test(priority=1, retryAnalyzer = MyRetry.class)
     public void loginPageLogoTest() {
         loginPage = new LoginPage(driver);
         Assert.assertEquals(loginPage.isLogoDisplayed(), true);
     }
 
-    @Test(priority=2)
+    @Test(priority=2, groups = {"functional"})
     public void loginPageUrlTest(){
         Assert.assertEquals(loginPage.getCurrentUrl(),"https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
     }
