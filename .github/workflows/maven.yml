@@ -29,12 +29,7 @@ jobs:
         cache: maven
     - name: Build/Run with Maven
       run: mvn clean test
-    - name: Deploy pages
-      # This action deploys the generated report folder to the 'gh-pages' branch
-      uses: Rohan/github-pages-deploy-action@v4
-      with:
-        branch: gh-pages # The branch to deploy to
-        folder: ./reports # The folder containing the HTML report files
+    
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
