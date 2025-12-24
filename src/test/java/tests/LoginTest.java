@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ser.Serializers;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -16,9 +18,8 @@ import pageobjects.LoginPage;
 
 import java.time.Duration;
 
-public class LoginTest extends BaseClass {
+public class LoginTest {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginTest.class);
     WebDriver driver;
     LoginPage loginPage;
 
@@ -26,24 +27,34 @@ public class LoginTest extends BaseClass {
     @Parameters("browser")
     public void setup(String browser) {
 
-        driver = getDriver(browser);
+        if (browser.equalsIgnoreCase("chrome")) {
+            WebDriverManager.chromedriver().setup();
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.addArguments("--headless=new");
+            driver = new ChromeDriver(chromeOptions);
+        } else if (browser.equalsIgnoreCase("firefox")) {
+            WebDriverManager.firefoxdriver().setup();
+            driver = new FirefoxDriver();
+        } else {
+            throw new IllegalArgumentException("Invalid browser parameter");
+        }
+        loginPage = new LoginPage(driver);
         driver.manage().window().fullscreen();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         driver.get("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
     }
 
-    @Test(priority=1, retryAnalyzer = MyRetry.class)
+    @Test(priority = 1, retryAnalyzer = MyRetry.class)
     public void loginPageLogoTest() {
-        loginPage = new LoginPage(driver);
         Assert.assertEquals(loginPage.isLogoDisplayed(), true);
     }
 
-    @Test(priority=2, groups = {"functional"})
-    public void loginPageUrlTest(){
-        Assert.assertEquals(loginPage.getCurrentUrl(),"https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
+    @Test(priority = 2)
+    public void loginPageUrlTest() {
+        Assert.assertEquals(loginPage.getCurrentUrl(), "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login");
     }
 
-    @Test(priority=3, dependsOnMethods = {"loginPageUrlTest"})
+    @Test(priority = 3, dependsOnMethods = {"loginPageUrlTest"})
     public void loginPageTitleTest() {
 
         loginPage.setUsername("Admin");
@@ -54,7 +65,7 @@ public class LoginTest extends BaseClass {
 
     @AfterClass
     public void teardown() {
-        teardown(driver);
+        driver.quit();
     }
 
 }
